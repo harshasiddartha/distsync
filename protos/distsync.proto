@@ -1,0 +1,52 @@
+syntax = "proto3";
+
+package distsync;
+
+// Service exposed by the Master (Coordinator)
+service DistSync {
+  rpc UploadFile(stream FileChunk) returns (UploadStatus);
+  rpc DownloadFile(FileRequest) returns (stream FileChunk);
+  rpc RegisterNode(NodeInfo) returns (Ack);
+  rpc Heartbeat(NodeHeartbeat) returns (Ack);
+}
+
+// Service exposed by a Worker Node for chunk storage/retrieval
+service NodeService {
+  rpc StoreChunk(FileChunk) returns (Ack);
+  rpc GetChunk(ChunkRequest) returns (FileChunk);
+}
+
+message FileChunk {
+  string filename = 1;
+  bytes data = 2;
+  int32 chunk_id = 3;
+  int32 total_chunks = 4;
+}
+
+message FileRequest {
+  string filename = 1;
+}
+
+message UploadStatus {
+  string message = 1;
+}
+
+message NodeInfo {
+  string node_id = 1;
+  string address = 2; // host:port
+}
+
+message NodeHeartbeat {
+  string node_id = 1;
+}
+
+message Ack {
+  bool success = 1;
+  string message = 2;
+}
+
+message ChunkRequest {
+  string filename = 1;
+  int32 chunk_id = 2;
+}
+
